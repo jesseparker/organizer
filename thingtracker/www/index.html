@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<!--
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+     KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+-->
+<html>
+    <head>
+        <!--
+        Customize this policy to fit your own app's needs. For more guidance, see:
+            https://github.com/apache/cordova-plugin-whitelist/blob/master/README.md#content-security-policy
+        Some notes:
+            * gap: is required only on iOS (when using UIWebView) and is needed for JS->native communication
+            * https://ssl.gstatic.com is required only on Android and is needed for TalkBack to function properly
+            * Disables use of inline scripts in order to mitigate risk of XSS vulnerabilities. To change this:
+                * Enable inline JS: add 'unsafe-inline' to default-src
+        -->
+        <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: gap: https://ssl.gstatic.com 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; media-src *; img-src 'self' data: content:;">
+        <meta name="format-detection" content="telephone=no">
+        <meta name="msapplication-tap-highlight" content="no">
+        <meta name="viewport" content="initial-scale=1, width=device-width, viewport-fit=cover">
+        <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+        <link rel="stylesheet" type="text/css" href="css/bootstrap-theme.min.css">
+        <link rel="stylesheet" type="text/css" href="css/index.css">
+		<script src="js/jquery-3.4.1.min.js"></script>
+		<script src="js/bootstrap.min.js"></script>
+        <script type="text/javascript" src="js/main.js"></script>
+
+        <title>Thing Tracker</title>
+    </head>
+    <body>
+
+<nav class="navbar navbar-default navbar-fixed-top ttnav">
+  <div class="container-fluid">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="#">ThingTracker</a>
+      <div class="quickbtn visible-xs">
+		  <a href="#" class="mythings"><span class="glyphicon glyphicon-list"></span></a>
+		  <a href="#" class="scanqrbtn"><span class="glyphicon glyphicon-qrcode"></span></a>
+		  <a href="#" class="newthing"><span class="glyphicon glyphicon-plus"></span></a>
+		  <!-- a href="#" onClick="convertImages();">CONVERT</a -->
+      </div>
+    </div>
+
+    <!-- Collect the nav links, forms, and other content for toggling -->
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+      <ul class="nav navbar-nav">
+        <li><a href="#" class="mythings"><span class="glyphicon glyphicon-list"></span> My Things</a></li>
+        <li><a href="#" class="scanqrbtn" data-dest="#thing" data-mode="lookup"><span class="glyphicon glyphicon-qrcode"></span> Scan</a></li>
+        <li><a href="#" class="newthing" ><span class="glyphicon glyphicon-plus"></span> New</a></li>
+        
+<!--         <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">New<span class="caret"></span></a>
+          <ul class="dropdown-menu">
+            <li><a href="#" class="newthing">Thing</a></li>
+            <li><a href="#" class="newplace">Place</a></li>
+           <li><a href="#">Something else here</a></li>
+            <li role="separator" class="divider"></li>
+            <li><a href="#">Separated link</a></li>
+            <li role="separator" class="divider"></li>
+            <li><a href="#">One more separated link</a></li>
+-->
+          </ul>
+        </li>
+
+      </ul>
+      <form class="navbar-form navbar-left thingsearch" role="search">
+        <div class="form-group">
+          <input type="text" class="form-control" placeholder="Search">
+        </div>
+        <button type="submit" class="btn btn-default">Submit</button>
+      </form>
+      <ul class="nav navbar-nav navbar-right">
+        <!--<li><a href="#">Link</a></li>-->
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">More<span class="caret"></span></a>
+          <ul class="dropdown-menu">
+            <li class="disabled"><a href="#">Account Settings</a></li>
+            <li role="separator" class="divider"></li>
+            <li><a href="/api/displays/toprint" id="printbtn">Print</a></li>
+            <li><a href="#" id="markprintedbtn">Clear Print (All)</a></li>
+            <li><a href="/api/displays">Sheet of Tags</a></li>
+            <li role="separator" class="divider"></li>
+            <li><a href="#" id="inventory">Inventory</a></li>
+            <li><a href="#" class="settingsbtn">Settings</a></li>
+            <li role="separator" class="divider loggedin"></li>
+            <li><a href="#" id="logoutbtn" class="loggedin">Log out</a></li>
+    <!--        <li><a href="#">Something else here</a></li>
+            <li role="separator" class="divider"></li>
+            <li><a href="#">Separated link</a></li>
+-->
+          </ul>
+        </li>
+      </ul>
+    </div><!-- /.navbar-collapse -->
+  </div><!-- /.container-fluid -->
+</nav>
+
+
+<div class="container-fluid">
+
+
+<div id="ajaxout"></div>
+<div id="status"></div>
+
+  <div id="home" class="toplevel">
+   <h1>ThingTracker</h1>
+   <h2>Easy Inventory</h2>
+  </div>
+
+  <div id="login" class="toplevel">
+
+  </div>
+
+  <div id="settings" class="toplevel">
+   <h1>Settings</h1>
+   <form name="settings">
+   <h3>Edit Pictures</h3>
+	   <input type="radio" name="editPictures" value="true" checked="true"> Yes
+	   <input type="radio" name="editPictures" value="false"> No
+   <h3>Lookup Scan Default</h3>
+	   <input type="radio" name="scanDefault" value="true" checked="true"> Yes
+	   <input type="radio" name="scanDefault" value="false"> No
+   <h3>Scan Beep</h3>
+	   <input type="radio" name="scanBeep" value="true" checked="true"> Yes
+	   <input type="radio" name="scanBeep" value="false"> No
+   <h3>Scan Light</h3>
+	   <input type="radio" name="scanLight" value="true" checked="true"> Yes
+	   <input type="radio" name="scanLight" value="false"> No
+   </form>
+  </div>
+
+  <div id="list" class="toplevel">
+  
+    <ul class="listgroup" id="listul">
+                
+	</ul>
+
+  </div>
+
+  <div id="scanqr" class="toplevel">
+    <div class="row">
+		<span class="glyphicon glyphicon-qrcode qrcode scanqrbtn" data-dest="#newtid" data-mode="set"></span> 
+    </div>
+
+	  <div class="row">
+	  
+	  <div id="manual">
+		<form id="manualform">
+			<input type="text" id="manualtag" value="TT">
+			<button>Enter</button>
+		</form>
+	  </div>
+    </div>
+	
+    <div class="row">
+      <form class="thingsearch">
+
+          <input type="text" class="form-control" placeholder="Search">
+        <button type="submit" class="btn btn-default">Submit</button>
+      </form>
+	</div>
+	  
+	<div class="row">
+	  <div id="recent"></div>
+	</div>
+
+  </div>
+
+
+
+  <div id="current" class="toplevel">
+
+   <div class="wrapcur thingcur">
+
+	<div class="container">
+		<div class="row text-center">
+			<div id="tname">NA</div>
+		</div>
+		<div class="row text-center">
+			<div id="thing" class="tid">NA</div>
+		</div>
+		<div class="row">
+			<div class="col-xs-8 text-center tMain">
+				<img src="img/none.png" id="thingimg" class="img-rounded">
+			</div>
+			<div class="col-xs-4 text-center tInfo">
+				<div class="row">
+					<div class="col-xs-3">
+						<span class="glyphicon glyphicon-log-in is-in"></span>
+					</div>
+					<div class="col-xs-9">
+						<img src="img/none.png" id="pimg" class="img-responsive img-rounded">
+						<span id="pname"></span>
+					</div>
+				</div>
+				<div class="row sku">
+					<div class="skuqtyadj">
+						<big><span class="glyphicon glyphicon-minus qtyadjdown"></span></big>
+						<span id="qty"></span>
+						<big><span class="glyphicon glyphicon-plus qtyadjup"></span></big>
+					</div>
+				</div>
+			</div>
+		</div>
+
+
+	</div>
+	
+	<div>
+	 <input type="text" size="40" value="NA" id="thingname" class="curdirty form-control input-lg">
+	</div>
+	
+<div class="mainbtns text-center">
+	<span class="glyphicon glyphicon-log-in qrcode scanqrbtn" data-dest="#place" data-mode="move"></span>
+	<span class="glyphicon glyphicon-camera camera camerabtn" data-dest="#thingimg" data-tid="#thing"></span>
+	<span id="settag" class="glyphicon glyphicon-qrcode qrcode scanqrbtn" data-dest="#place" data-mode="set"></span>
+	<span class="glyphicon glyphicon-log-out removebtn"></span>
+</div>
+
+		
+
+
+<div class="panel-group" id="accordion">
+  <div class="panel panel-default">
+    <div class="panel-heading">
+        <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href="#collapseOne">
+          <p class="text-right"><big><span class="glyphicon glyphicon-cog"></span></big></p>
+        </a>
+    </div>
+    <div id="collapseOne" class="panel-collapse collapse out">
+      <div class="panel-body">
+		<div id="thingtypecontainer">
+			<select value="NA" id="thingtype" class="form-control input-lg">
+				<option value="UNQ">Unique Object</option>
+				<option value="SKU">Stock Keeping Unit</option>
+				<option value="RACK">Rack</option>
+			</select>
+		</div>
+		<div class="sku">
+		 Qty <input type="number" size="40" value="1" id="skuqty" class="curdirty  form-control input-lg">
+		 Min Qty <input type="number" size="40" value="0" id="skuminqty" class="curdirty  form-control input-lg">
+		</div>
+			<div class="rack">
+			 Columns <input type="number" size="40" value="1" id="rackcols" class="curdirty  form-control input-lg">
+			 Rows <input type="number" size="40" value="1" id="rackrows" class="curdirty  form-control input-lg">
+			</div>
+			<div>
+		
+		 <p><span class="glyphicon glyphicon-print"></span> <label class="checkbox-inline">
+		  <input type="checkbox" id="printq" value="1" checked="false"> Print
+		</label>
+		  <p><a href="#" id="deletething"><span class="glyphicon glyphicon-remove"></span> Delete</a></p>
+		 </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+</div>
+	<div id="children" class="">
+
+	</div>
+	
+   <div class="wrapcur parentcur">
+	<div class="row text-center">
+			<span>Contained in</span>
+	</div>
+	<div class="row text-center">
+		<div id="lineage" class="">NA</div>
+	</div>
+	<div class="row">
+		<div class="col-xs-4 text-center">
+
+			<img src="img/none.png" id="parentimg" class="img-responsive img-rounded">
+			<div id="parentname">NA</div>
+			<div id="parent" class="tid">NA</div>
+		</div>
+		<div class="rackposition col-xs-8">
+			<div id="rackpossel"></div>
+			<input type="text" size="40" value="NA" id="rackposition" class="curdirty  form-control input-lg">
+		</div>
+	</div>
+
+   </div>
+
+
+  </div>
+
+
+</div>
+
+
+<div id="footer" class="navbar navbar-fixed-bottom">
+	<button type="button" class="btn btn-default btn-lg savebtn">
+		<span class="glyphicon glyphicon-floppy-save" aria-hidden="true"></span> Save
+	</button>
+</div>
+
+<br>
+
+		
+        <script type="text/javascript" src="cordova.js"></script>
+        <script type="text/javascript" src="js/index.js"></script>
+    </body>
+</html>
