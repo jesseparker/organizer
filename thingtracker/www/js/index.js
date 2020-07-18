@@ -19,11 +19,17 @@
 var db = null;
 var dbFile = 'tnings.db';
 var dbdirectory = null;
+var toplevel = null;
 
 var app = {
     // Application Constructor
     initialize: function() {
         document.addEventListener('deviceready', this.onDeviceReady.bind(this), false);
+		
+		//document.addEventListener("backbutton", onBackKeyDown, false);
+
+		document.addEventListener('backbutton', onBackButton, false);
+
     },
 
     // deviceready Event Handler
@@ -102,6 +108,26 @@ var app = {
 };
 
 app.initialize();
+
+/*function onBackKeyDown() {
+    console.log('back');
+//	return true;
+e.preventDefault();
+
+}
+*/
+
+function onBackButton(){
+	  if(toplevel == "#list"){
+	navigator.app.exitApp();
+}
+else{
+	console.log("go to list");
+	listThings();
+
+}
+
+}
 
 // From camera plugin example
 function setOptions(srcType) {
@@ -296,10 +322,10 @@ function getThings(pattern = false, callback) {
     db.transaction(function (tx) {
 
 		if (pattern) {
-			var query = "SELECT * from things where name like '%"+pattern+"%' order by time_modified desc";
+			var query = "SELECT * from things where name like '%"+pattern+"%' order by time_modified desc limit 20";
 		}
 		else {		
-			var query = "SELECT * from things order by time_modified desc";
+			var query = "SELECT * from things order by time_modified desc limit 20";
 		}
 		var thing = null;
         tx.executeSql(query, [], function (tx, resultSet) {

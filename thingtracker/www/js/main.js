@@ -360,9 +360,11 @@ $('.savebtn').hide();
 function listThings(){
 
 	$("#listul").html('');
-	switch_toplevel('#list');
 
+	switch_toplevel('#list');
+	
 	updateThingList();
+
 }
 
 function updateThingList(pattern = false) {
@@ -819,7 +821,8 @@ function setNewTid(current, to_be) {
 	});
 }
 
-function switch_toplevel(newtoplevel) {		
+function switch_toplevel(newtoplevel) {
+	toplevel=newtoplevel;
   $('.toplevel').hide();
   $(newtoplevel).show();
   return true;
