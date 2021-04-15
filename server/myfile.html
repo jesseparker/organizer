@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Node delivered HTML</title>
+
+</head>
+<body>
+   <div>
+   	<h1>Send JSON to Node</h1>
+        <button onClick="sendJSON()">Send</button>
+        <p id ="result">
+        </p>
+   </div>
+<script>
+ var myData = [
+	{
+		"id": 1002,
+		"user_id": 210,
+	    "name": "Banana",
+	    "parentId": 20,
+		"type": "NORMAL",
+		"sku_min_qty": 0,
+		"sku_qty": 0,
+		"qty": 1,
+		"type_data": "something",
+		"rack_rows": 10,
+		"rack_cols": 2,
+		"rack_position": "A2",
+		"imageData": "asdasd;lk;asld;ald;alskdkasjdhkasjhdkasjhdkajsdhkajdhkajsdhas"
+	}
+    ]
+
+function sendJSON(){
+
+var xmlhttp = new XMLHttpRequest();   // new HttpRequest instance
+xmlhttp.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+       document.getElementById("result").innerHTML =
+       this.responseText;
+    }
+ };
+xmlhttp.open("POST", "http://tango.ca:3000/updateThing");
+xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+xmlhttp.send(JSON.stringify(myData));
+
+}
+
+</script>
+</body>
+</html>
