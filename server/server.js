@@ -21,18 +21,18 @@ connection.connect(function(err) {
    else {
        console.log('Connected to MySQL');
        // Start the app when connection is ready
-       app.listen(3000);
-       console.log('Server listening on port 3000');
+       app.listen(3334);
+       console.log('Server listening on port 3334');
  }
 });
 
 app.use(bodyParser.json())
 
 app.get('/', function(req, res) {
-  res.sendFile(path.join(__dirname+ '/myfile.html'));
+  res.sendFile(path.join(__dirname+ '/index.html'));
 });
 
-app.post('/', function(req, res) {
+app.post('/addThing', function(req, res) {
 
 var jsondata = req.body;
 var values = [];

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Node delivered HTML</title>
+<script>
+ var myData = 
+        {
+                "id": 1002,
+                "user_id": 210,
+            "name": "Banana",
+            "parentId": 20,
+                "type": "NORMAL",
+                "sku_min_qty": 0,
+                "sku_qty": 0,
+                "qty": 1,
+                "type_data": "something",
+                "rack_rows": 10,
+                "rack_cols": 2,
+                "rack_position": "A2",
+                "imageData": "asdasd;lk;asld;ald;alskdkasjdhkasjhdkasjhdkajsdhkajdhkajsdhas"
+        }
+    
+
+function init() {
+	console.log(myData);
+	for (var nm in myData) {
+		console.log(myData[nm]);
+		document.getElementById('thingForm').innerHTML += nm+'<br><input name="'+nm+'" value="'+myData[nm]+'"><br>';
+	}
+}
+
+function setVal(attr, val) {
+  return document.getElementById('thingForm').elements[attr].value = value;
+}
+
+function getVal(attr) {
+  return document.getElementById('thingForm').elements[attr].value;
+}
+
+
+function addThing() {
+	for (var nm in myData) {
+                myData[nm] = document.getElementById('thingForm').elements[nm].value;
+        }
+	sendJSON('addThing', myData);
+}
+
+function updateThing() {
+        for (var nm in myData) {
+                myData[nm] = document.getElementById('thingForm').elements[nm].value;
+        }
+        sendJSON('updateThing', myData);
+}
+
+
+function sendJSON(method, data){
+
+var xmlhttp = new XMLHttpRequest();   // new HttpRequest instance
+xmlhttp.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+       document.getElementById("result").innerHTML =
+       this.responseText;
+    }
+ };
+xmlhttp.open("POST", "http://tango.ca:3334/"+method);
+xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+xmlhttp.send(JSON.stringify([data]));
+
+}
+
+</script>
+
+</head>
+<body>
+   <div>
+	   <form action="#" id="thingForm">
+	   </form>
+        <button onClick="addThing()">add</button>
+	<button onClick="updateThing()">update</button>
+        <p id ="result">
+        </p>
+   </div>
+   <script>init();</script>
+</body>
+</html>
