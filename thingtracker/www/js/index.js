@@ -317,15 +317,15 @@ function updateThingField(id, field, value, callback) {
         console.log('transaction ok');
     });
 }
-function getThings(pattern = false, callback) {
+function getThings(pattern = false, callback, limit = 20) {
 
     db.transaction(function (tx) {
 
 		if (pattern) {
-			var query = "SELECT * from things where name like '%"+pattern+"%' order by time_modified desc limit 20";
+			var query = "SELECT * from things where name like '%"+pattern+"%' order by time_modified desc limit "+limit;
 		}
 		else {		
-			var query = "SELECT * from things order by time_modified desc limit 20";
+			var query = "SELECT * from things order by time_modified desc limit "+limit;
 		}
 		var thing = null;
         tx.executeSql(query, [], function (tx, resultSet) {
@@ -604,3 +604,23 @@ function updateTid(current, to_be, successCallback, errorCallback) {
 
 
 }
+
+function addOnServer(thing) {
+
+		sendJSON('addThing', thing);
+}
+
+function sendJSON(method, data){
+
+var xmlhttp = new XMLHttpRequest();   // new HttpRequest instance
+xmlhttp.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+       console.log(this.responseText);
+    }
+ };
+xmlhttp.open("POST", "http://tango.ca:3334/"+method);
+xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+xmlhttp.send(JSON.stringify([data]));
+
+}
+

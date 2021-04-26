@@ -354,6 +354,10 @@ $('#skuqty').change(function() {
 
 $('.savebtn').hide();
 
+$('.uploadAll').click(function() {
+	uploadAll();
+});
+
 } // end begin
 
 
@@ -957,5 +961,30 @@ function updateRecent() {
 	</div>
 </div>`);
 	});
+}
+
+function uploadAll() {
+	 var myData = 
+        {
+                "id": 1002,
+                "user_id": 210,
+            "name": "Banana",
+            "parentId": 20,
+                "type": "NORMAL",
+                "sku_min_qty": 0,
+                "sku_qty": 0,
+                "qty": 1,
+                "type_data": "something",
+                "rack_rows": 10,
+                "rack_cols": 2,
+                "rack_position": "A2",
+                "imageData": "asdasd;lk;asld;ald;alskdkasjdhkasjhdkasjhdkajsdhkajdhkajsdhas"
+        }
+		getThings(false, function(thing) {
+			thing.user_id = 210;
+			console.log(thing);
+			addOnServer(thing);
+		}, 300);
+	
 }
 
