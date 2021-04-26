@@ -62,7 +62,6 @@ for(var i=0; i< jsondata.length; i++)
   values = [jsondata[i].name, jsondata[i].parentId, jsondata[i].type, jsondata[i].sku_min_qty, jsondata[i].sku_qty, jsondata[i].qty, jsondata[i].type_data, jsondata[i].rack_rows, jsondata[i].rack_cols, jsondata[i].rack_position, jsondata[i].imageData, jsondata[i].id, jsondata[i].user_id];
 
 
-//Bulk insert using nested array [ [a,b],[c,d] ] will be flattened to (a,b),(c,d)
 connection.query('update things set name = ?, parentId = ?, type = ?, sku_min_qty = ?, sku_qty = ?, qty = ?, type_data = ?, rack_rows = ?, rack_cols = ?, rack_position = ?, imageData = ? where thing_id = ? and user_id = ?', values, function(err,result) {
   if(err) {
      res.send('Error');
@@ -73,4 +72,25 @@ connection.query('update things set name = ?, parentId = ?, type = ?, sku_min_qt
   }
 });
 });
+
+app.post('/updateThingField', function(req, res) {
+
+var jsondata = req.body;
+var field = jsondata[0].field;
+
+var substitutions = [jsondata[0].value, jsondata[i].id, jsondata[i].user_id];
+
+
+connection.query('update things set '+field+' = ? where id = ? and user_id = ?', substitutions, function(err,result) {
+  if(err) {
+     res.send('Error');
+          console.log(err);
+  }
+ else {
+     res.send('Success');
+  }
+});
+});
+
+
 
