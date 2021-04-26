@@ -1,7 +1,7 @@
 drop table if exists things;
 create table things (
 	id int(11) not null auto_increment primary key,
-	thing_id int(11) not null,
+	thing_id varchar(20) not null,
 	user_id int(11) not null,
 	name varchar(100) null default '',
 	imageFile varchar(100) null default '',
