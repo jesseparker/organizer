@@ -38,11 +38,11 @@ var jsondata = req.body;
 var values = [];
 
 for(var i=0; i< jsondata.length; i++)
-  values.push([jsondata[i].id, jsondata[i].user_id, jsondata[i].name, jsondata[i].parentId, jsondata[i].type, jsondata[i].sku_min_qty, jsondata[i].sku_qty, jsondata[i].qty, jsondata[i].type_data, jsondata[i].rack_rows, jsondata[i].rack_cols, jsondata[i].rack_position, jsondata[i].imageData]);
+  values.push([jsondata[i].id, jsondata[i].user_id, jsondata[i].name, jsondata[i].parentId, jsondata[i].type, jsondata[i].sku_min_qty, jsondata[i].sku_qty, jsondata[i].qty, jsondata[i].type_data, jsondata[i].rack_rows, jsondata[i].rack_cols, jsondata[i].rack_position, jsondata[i].imageData, jsondata[i].time_created, jsondata[i].time_modified, jsondata[i].time_scanned]);
 
 
 //Bulk insert using nested array [ [a,b],[c,d] ] will be flattened to (a,b),(c,d)
-connection.query('INSERT INTO things (thing_id, user_id, name, parentId, type, sku_min_qty, sku_qty, qty, type_data, rack_rows, rack_cols, rack_position, imageData) VALUES ?', [values], function(err,result) {
+connection.query('INSERT INTO things (thing_id, user_id, name, parentId, type, sku_min_qty, sku_qty, qty, type_data, rack_rows, rack_cols, rack_position, imageData, time_created, time_modified, time_scanned) VALUES ?', [values], function(err,result) {
   if(err) {
      res.send('Error');
 	  console.log(err);
@@ -59,10 +59,10 @@ var jsondata = req.body;
 var values = [];
 
 for(var i=0; i< jsondata.length; i++)
-  values = [jsondata[i].name, jsondata[i].parentId, jsondata[i].type, jsondata[i].sku_min_qty, jsondata[i].sku_qty, jsondata[i].qty, jsondata[i].type_data, jsondata[i].rack_rows, jsondata[i].rack_cols, jsondata[i].rack_position, jsondata[i].imageData, jsondata[i].id, jsondata[i].user_id];
+  values = [jsondata[i].name, jsondata[i].parentId, jsondata[i].type, jsondata[i].sku_min_qty, jsondata[i].sku_qty, jsondata[i].qty, jsondata[i].type_data, jsondata[i].rack_rows, jsondata[i].rack_cols, jsondata[i].rack_position, jsondata[i].imageData, jsondata[i].time_created, jsondata[i].time_modified, jsondata[i].time_scanned, jsondata[i].id, jsondata[i].user_id];
 
-
-connection.query('update things set name = ?, parentId = ?, type = ?, sku_min_qty = ?, sku_qty = ?, qty = ?, type_data = ?, rack_rows = ?, rack_cols = ?, rack_position = ?, imageData = ? where thing_id = ? and user_id = ?', values, function(err,result) {
+console.log('update Thing');
+connection.query('update things set name = ?, parentId = ?, type = ?, sku_min_qty = ?, sku_qty = ?, qty = ?, type_data = ?, rack_rows = ?, rack_cols = ?, rack_position = ?, imageData = ?, time_created = ?, time_modified = ?, time_scanned = ? where thing_id = ? and user_id = ?', values, function(err,result) {
   if(err) {
      res.send('Error');
           console.log(err);
@@ -78,10 +78,11 @@ app.post('/updateThingField', function(req, res) {
 var jsondata = req.body;
 var field = jsondata[0].field;
 
-var substitutions = [jsondata[0].value, jsondata[i].id, jsondata[i].user_id];
+var substitutions = [jsondata[0].value, jsondata[0].id, jsondata[0].user_id];
 
+console.log('update ' + field);
 
-connection.query('update things set '+field+' = ? where id = ? and user_id = ?', substitutions, function(err,result) {
+connection.query('update things set '+field+' = ? where thing_id = ? and user_id = ?', substitutions, function(err,result) {
   if(err) {
      res.send('Error');
           console.log(err);

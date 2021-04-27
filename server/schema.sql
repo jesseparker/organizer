@@ -5,7 +5,7 @@ create table things (
 	user_id int(11) not null,
 	name varchar(100) null default '',
 	imageFile varchar(100) null default '',
-	parentId int(11) null default null,
+	parentId varchar(20) null default null,
 	print tinyint(1) null default 0,
 	`type` varchar(20) null default '',
 	sku_min_qty int(11) null default null,
