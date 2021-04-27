@@ -4,6 +4,7 @@
 var TID_THING = 1;
 var TID_INVALID = -1;
 var qrsc = "";
+var userId = 2029;
 
 function ajaxError(z, a, b, c) {
 	//alert('ajaxError: ' + z + ':' + JSON.stringify(a) + ' ' + b + ' ' + c);
@@ -355,7 +356,7 @@ $('#skuqty').change(function() {
 $('.savebtn').hide();
 
 $('.uploadAll').click(function() {
-	uploadAll();
+	updateAll();
 });
 
 } // end begin
@@ -964,27 +965,17 @@ function updateRecent() {
 }
 
 function uploadAll() {
-	 var myData = 
-        {
-                "id": 1002,
-                "user_id": 210,
-            "name": "Banana",
-            "parentId": 20,
-                "type": "NORMAL",
-                "sku_min_qty": 0,
-                "sku_qty": 0,
-                "qty": 1,
-                "type_data": "something",
-                "rack_rows": 10,
-                "rack_cols": 2,
-                "rack_position": "A2",
-                "imageData": "asdasd;lk;asld;ald;alskdkasjdhkasjhdkasjhdkajsdhkajdhkajsdhas"
-        }
 		getThings(false, function(thing) {
-			thing.user_id = 210;
+			thing.user_id = userId;
 			console.log(thing);
 			addOnServer(thing);
-		}, 300);
-	
+		}, 1000);
 }
 
+function updateAll() {
+		getThings(false, function(thing) {
+			thing.user_id = userId;
+			console.log(thing);
+			updateFieldOnServer(thing, 'name');
+		}, 1000);
+}
