@@ -973,9 +973,28 @@ function uploadAll() {
 }
 
 function updateAll() {
-		getThings(false, function(thing) {
-			thing.user_id = userId;
-			console.log(thing);
-			updateFieldOnServer(thing, 'name');
+		getAllThings(false, function(things) {
+			console.log(things);
+			for(x=0; x<things.rows.length; x++) {
+				console.log('index '+x);
+				var thing = things.rows.item(x);
+				console.log(thing.name);
+				thing.user_id = userId;
+				getThingFromServer(thing, function(thing, remoteThing) {
+					console.log(remoteThing);
+					remoteThing = JSON.parse(remoteThing);
+					console.log('remote', remoteThing);
+					console.log('local', thing);
+					console.log(remoteThing.time_modified, thing.time_modified);
+					if (remoteThing.time_modified < thing.time_modified) {
+						console.log('thing has been updated ' + thing.id);
+						updateOnServer(thing);
+					}
+				});
+
+				//things[x].user_id = userId;
+				//console.log(thing[x]);
+				//updateFieldOnServer(things[x], 'name');
+			}
 		}, 1000);
 }

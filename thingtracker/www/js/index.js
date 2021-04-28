@@ -80,21 +80,7 @@ var app = {
 		}, function () {
 			console.log('transaction ok');
 		});
-		/*
-		getNextUntaggedId(function(unid) {
 
-		db.transaction(function (tx) {
-			var sql = "update things set id = '"+unid+"' where name like 'Wemos h-bridge shield%'";
-			console.log(sql);
-			tx.executeSql(sql);
-
-		}, function (error) {
-			console.log('transaction error: ' + error.message);
-		}, function () {
-			console.log('transaction ok');
-		});
-		});
-		*/
 		begin(); 
 		
 		
@@ -351,6 +337,7 @@ function getThings(pattern = false, callback, limit = 20) {
     });
 }
 
+
 function getThing(tid, foundCallback, notFoundCallback) {
 console.log('getThing ' +tid);
 
@@ -372,6 +359,32 @@ console.log('getThing ' +tid);
 			var thingg = resultSet.rows.item(0);
 			foundCallback(thingg);
 		
+        },
+        function (tx, error) {
+            console.log('SELECT error: ' + error.message);
+        });
+    }, function (error) {
+        console.log('transaction error: ' + error.message);
+    }, function () {
+        console.log('transaction ok');
+    });
+}
+
+function getAllThings(pattern = false, callback, limit = 1000) {
+
+    db.transaction(function (tx) {
+
+		if (pattern) {
+			var query = "SELECT * from things where name like '%"+pattern+"%' order by time_modified desc limit "+limit;
+		}
+		else {		
+			var query = "SELECT * from things order by time_modified desc limit "+limit;
+		}
+		var thing = null;
+        tx.executeSql(query, [], function (tx, resultSet) {
+
+		//console.log(resultSet);
+			callback(resultSet);
         },
         function (tx, error) {
             console.log('SELECT error: ' + error.message);
@@ -618,17 +631,26 @@ function updateFieldOnServer(thing, field) {
 		sendJSON('updateThingField', { 'id': thing.id, 'field': field, 'value': thing[field], 'user_id': thing.user_id });
 }
 
-function sendJSON(method, data){
+function getThingFromServer(thing, callback) {
+
+		return sendJSON('getThing', { 'id': thing.id, 'user_id': thing.user_id }, callback, thing);
+}
+
+
+function sendJSON(method, data, callback = false, thing = false){
 
 	var xmlhttp = new XMLHttpRequest();   // new HttpRequest instance
 	xmlhttp.onreadystatechange = function() {
 		if (this.readyState == 4 && this.status == 200) {
-		   console.log(this.responseText);
+			console.log(this.responseText);
+			if (callback != false)
+				callback(thing, xmlhttp.response);
 		}
 	 };
 	xmlhttp.open("POST", "http://tango.ca:3334/"+method);
 	xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
 	xmlhttp.send(JSON.stringify([data]));
 
+	
 }
 
