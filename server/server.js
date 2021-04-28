@@ -93,5 +93,25 @@ connection.query('update things set '+field+' = ? where thing_id = ? and user_id
 });
 });
 
+app.post('/getThing', function(req, res) {
+
+var jsondata = req.body;
+
+var substitutions = [jsondata[0].id, jsondata[0].user_id];
+
+console.log('get thing', substitutions);
+
+connection.query('select * from things where thing_id = ? and user_id = ?', substitutions, function(err,result) {
+  if(err) {
+     res.send('Error');
+          console.log(err);
+  }
+ else {
+     res.send(JSON.stringify(result[0]));
+  }
+});
+});
+
+
 
 
