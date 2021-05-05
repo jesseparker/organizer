@@ -3,7 +3,7 @@
 
 var TID_THING = 1;
 var TID_INVALID = -1;
-var qrsc = "";
+//var qrsc = "";
 var userId = 2029;
 
 function ajaxError(z, a, b, c) {
@@ -964,31 +964,54 @@ function updateRecent() {
 	});
 }
 
-function uploadAll() {
-		getThings(false, function(thing) {
-			thing.user_id = userId;
-			console.log(thing);
-			addOnServer(thing);
-		}, 1000);
-}
-
 function updateAll() {
+	
+	getThingsFromServer(function(junk, remoteThings) {
+			console.log(remoteThings);
+
 		getAllThings(false, function(things) {
 			console.log(things);
 			for(x=0; x<things.rows.length; x++) {
 				console.log('index '+x);
+				
 				var thing = things.rows.item(x);
-				console.log(thing.name);
+				console.log(thing.id, thing.name);
 				thing.user_id = userId;
+				
+				remoteThing = false;
+				console.log(remoteThings.length);
+				for(var y=0; y<remoteThings.length; y++) {
+					console.log(remoteThings[y].name);
+						if (remoteThings[y].thing_id == thing.id) {
+							remoteThing = remoteThings[y];
+							break;
+						}
+				}
+				
+				if (remoteThing == false) {
+					console.log("can't find remote " + thing.id);
+				}
+				else {
+					console.log("found remote " + thing.id);
+					
+				}
+				return true;
+				
 				getThingFromServer(thing, function(thing, remoteThing) {
 					console.log(remoteThing);
-					remoteThing = JSON.parse(remoteThing);
-					console.log('remote', remoteThing);
-					console.log('local', thing);
-					console.log(remoteThing.time_modified, thing.time_modified);
-					if (remoteThing.time_modified < thing.time_modified) {
-						console.log('thing has been updated ' + thing.id);
-						updateOnServer(thing);
+					if (remoteThing == "") {
+						//console.log('not found '+thing.name);
+						addOnServer(thing);
+					}
+					else {
+						remoteThing = JSON.parse(remoteThing);
+						//console.log('remote', remoteThing);
+						//console.log('local', thing);
+						//console.log(remoteThing.time_modified, thing.time_modified);
+						if (remoteThing.time_modified < thing.time_modified) {
+							//console.log('thing has been updated ' + thing.id);
+							updateOnServer(thing);
+						}
 					}
 				});
 
@@ -997,4 +1020,9 @@ function updateAll() {
 				//updateFieldOnServer(things[x], 'name');
 			}
 		}, 1000);
+		
+	});
+	return true;
+	
+
 }

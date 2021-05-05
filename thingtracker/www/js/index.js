@@ -58,19 +58,6 @@ var app = {
 		//db = window.sqlitePlugin.openDatabase({name: dbFile, location: cordova.file.externalDataDirectory, iosDatabaseLocation: 'Library'});
 
 		db.transaction(function (tx) {
-
-		
-			//tx.executeSql('drop TABLE things');
-			//tx.executeSql('ALTER TABLE things ADD type_data text');
-			//tx.executeSql('ALTER TABLE things ADD rack_rows');
-			//tx.executeSql('ALTER TABLE things ADD rack_cols');
-			//tx.executeSql('ALTER TABLE things ADD rack_position');
-			//tx.executeSql('ALTER TABLE things ADD time_created integer');
-			//tx.executeSql('ALTER TABLE things ADD time_modified integer');
-			//tx.executeSql('ALTER TABLE things ADD time_scanned integer');
-			//tx.executeSql('ALTER TABLE things ADD time_scanned integer');
-			//tx.executeSql('ALTER TABLE things ADD imageData text');
-			//tx.executeSql('CREATE TABLE IF NOT EXISTS things (id text, name, imageFile, parentId, print, type, sku_min_qty, sku_qty, qty, type_data, rack_rows, rack_cols, rack_position, time_created integer, time_modified integer, time_scanned integer)');
 		
 			//tx.executeSql('update things set time_modified = time_modified / 1000');
 			tx.executeSql('CREATE TABLE IF NOT EXISTS things (id text, name, imageFile, parentId, print, type, sku_min_qty, sku_qty, qty, type_data, rack_rows, rack_cols, rack_position, imageData, time_created integer, time_modified integer, time_scanned integer)');
@@ -83,10 +70,6 @@ var app = {
 
 		begin(); 
 		
-		
-		$('#things').click(function () {
-			getThings();
-		});
     },
 
     // Update DOM on a Received Event
@@ -183,7 +166,7 @@ function addThing(id, name, imageFile, parentId, print, type, sku_min_qty, sku_q
 
 		var now = new Date();
 		var created = Math.round(now.getTime() / 1000);
-        tx.executeSql(query, [id, name, imageFile, parentId, print, type, sku_min_qty, sku_qty, qty, type_data, rack_rows, rack_cols, rack_position, imageData, created, created, 0], function(tx, res) {
+        tx.executeSql(query, [id, name, imageFile, parentId, print, type, sku_min_qty, sku_qty, qty, type_data, rack_rows, rack_cols, rack_position, imageData, created, created, created], function(tx, res) {
             console.log("rowsAffected: " + res.rowsAffected + " -- should be 1");
 			callback(id, res.rowsAffected);
         },
@@ -636,6 +619,10 @@ function getThingFromServer(thing, callback) {
 		return sendJSON('getThing', { 'id': thing.id, 'user_id': thing.user_id }, callback, thing);
 }
 
+function getThingsFromServer(callback) {
+
+		return sendJSON('getThings', { 'user_id': userId }, callback);
+}
 
 function sendJSON(method, data, callback = false, thing = false){
 
