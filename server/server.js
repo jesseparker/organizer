@@ -5,6 +5,7 @@ var app = express();
 var path = require('path');
 var bodyParser = require('body-parser');
 var mysql = require('mysql');
+var cors = require('cors');
 
 // Configure MySQL connection
 var connection = mysql.createConnection({
@@ -27,6 +28,8 @@ connection.connect(function(err) {
 });
 
 app.use(bodyParser.json())
+
+app.use(cors());
 
 app.get('/', function(req, res) {
   res.sendFile(path.join(__dirname+ '/index.html'));
@@ -111,6 +114,31 @@ connection.query('select * from things where thing_id = ? and user_id = ?', subs
   }
 });
 });
+
+app.post('/getThings', function(req, res) {
+
+	res.set('Access-Control-Allow-Origin', '*');
+
+var jsondata = req.body;
+
+var substitutions = [jsondata[0].user_id];
+
+console.log('get things', substitutions);
+
+connection.query('select thing_id, time_modified from things where user_id = ?', substitutions, function(err,result) {
+  if(err) {
+     res.send('Error');
+          console.log(err);
+  }
+ else {
+	 res.set('Access-Control-Allow-Origin', '*');
+
+     res.send(JSON.stringify(result));
+  }
+});
+});
+
+
 
 
 
