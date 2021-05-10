@@ -58,9 +58,10 @@ var app = {
 		//db = window.sqlitePlugin.openDatabase({name: dbFile, location: cordova.file.externalDataDirectory, iosDatabaseLocation: 'Library'});
 
 		db.transaction(function (tx) {
+			//tx.executeSql('ALTER TABLE things ADD time_deleted integer');
 		
 			//tx.executeSql('update things set time_modified = time_modified / 1000');
-			tx.executeSql('CREATE TABLE IF NOT EXISTS things (id text, name, imageFile, parentId, print, type, sku_min_qty, sku_qty, qty, type_data, rack_rows, rack_cols, rack_position, imageData, time_created integer, time_modified integer, time_scanned integer)');
+			tx.executeSql('CREATE TABLE IF NOT EXISTS things (id text, name, imageFile, parentId, print, type, sku_min_qty, sku_qty, qty, type_data, rack_rows, rack_cols, rack_position, imageData, time_created integer, time_modified integer, time_scanned integer, time_deleted)');
  
 		}, function (error) {
 			console.log('transaction error: ' + error.message);
@@ -206,10 +207,15 @@ function updateThing(id, name, imageFile, parentId, print, type, sku_min_qty, sk
 function deleteThing(id, callback) {
 
     db.transaction(function (tx) {
+	
+		var now = new Date();	
+		var deleted = Math.round(now.getTime() / 1000);
+		
+        var query = "update things set time_deleted = ? where id = ?";
+        //var query = "delete from things where id = ?";
+		console.log(query);
 
-        var query = "delete from things where id = '" +tid+"'";
-
-        tx.executeSql(query, [], function(tx, res) {
+        tx.executeSql(query, [deleted, id], function(tx, res) {
             //console.log("insertId: " + res.insertId + " -- probably 1");
             console.log("rowsAffected: " + res.rowsAffected + " -- should be 1");
 			callback(res.rowsAffected);
@@ -291,10 +297,10 @@ function getThings(pattern = false, callback, limit = 20) {
     db.transaction(function (tx) {
 
 		if (pattern) {
-			var query = "SELECT * from things where name like '%"+pattern+"%' order by time_modified desc limit "+limit;
+			var query = "SELECT * from things where time_deleted is null and name like '%"+pattern+"%' order by time_modified desc limit "+limit;
 		}
 		else {		
-			var query = "SELECT * from things order by time_modified desc limit "+limit;
+			var query = "SELECT * from things where time_deleted is null order by time_modified desc limit "+limit;
 		}
 		var thing = null;
         tx.executeSql(query, [], function (tx, resultSet) {
@@ -357,12 +363,36 @@ function getAllThings(pattern = false, callback, limit = 1000) {
 
     db.transaction(function (tx) {
 
+
 		if (pattern) {
-			var query = "SELECT * from things where name like '%"+pattern+"%' order by time_modified desc limit "+limit;
+			var query = "SELECT * from things where time_deleted is null and name like '%"+pattern+"%' order by time_modified desc limit "+limit;
 		}
 		else {		
-			var query = "SELECT * from things order by time_modified desc limit "+limit;
+			var query = "SELECT * from things where time_deleted is null order by time_modified desc limit "+limit;
 		}
+
+		var thing = null;
+        tx.executeSql(query, [], function (tx, resultSet) {
+
+		//console.log(resultSet);
+			callback(resultSet);
+        },
+        function (tx, error) {
+            console.log('SELECT error: ' + error.message);
+        });
+    }, function (error) {
+        console.log('transaction error: ' + error.message);
+    }, function () {
+        console.log('transaction ok');
+    });
+}
+///todo
+function getDeletedThings(callback, limit = 1000) {
+
+    db.transaction(function (tx) {
+
+		var query = "SELECT * from things where time_deleted is not null";
+
 		var thing = null;
         tx.executeSql(query, [], function (tx, resultSet) {
 
@@ -414,6 +444,38 @@ function getChildren(tid, callback) {
 		var thing = null;
 		
         tx.executeSql(query, [], function (tx, resultSet) {
+
+		//console.log(resultSet);
+		
+            for(var x = 0; x < resultSet.rows.length; x++) {
+				thing = resultSet.rows.item(x);
+				
+                console.log('child ' + thing);
+				
+				callback(thing);
+				
+			}
+        },
+        function (tx, error) {
+            console.log('SELECT error: ' + error.message);
+        });
+    }, function (error) {
+        console.log('transaction error: ' + error.message);
+    }, function () {
+        console.log('transaction ok');
+    });
+
+}
+
+function getRackChildren(tid, callback) {
+	
+    db.transaction(function (tx) {
+
+		var query = "SELECT * from things where parentId = ? order by rack_position";
+
+		var thing = null;
+		
+        tx.executeSql(query, [tid], function (tx, resultSet) {
 
 		//console.log(resultSet);
 		

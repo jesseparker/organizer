@@ -55,7 +55,7 @@
 -->
           </ul>
         </li>
-<a href="#" id="uploadAll" class="uploadAll">Backup</a>
+<a href="#" class="remoteSync">SYNC</a>
       </ul>
 
       <form class="navbar-form navbar-left thingsearch" role="search">
@@ -76,10 +76,9 @@
             <li><a href="#" id="markprintedbtn">Clear Print (All)</a></li>
             <li><a href="/api/displays">Sheet of Tags</a></li>
             <li role="separator" class="divider"></li>
-            <li><a href="#" id="inventory">Inventory</a></li>
             <li><a href="#" class="settingsbtn">Settings</a></li>
             <li role="separator" class="divider loggedin"></li>
-            <li><a href="#" id="uploadAll" class="uploadAll">Backup</a></li>
+            <li><a href="#" class="remoteSync">SYNC</a></li>
             <li><a href="#" id="logoutbtn" class="loggedin">Log out</a></li>
 
     <!--        <li><a href="#">Something else here</a></li>
@@ -213,6 +212,7 @@
 	<span class="glyphicon glyphicon-camera camera camerabtn" data-dest="#thingimg" data-tid="#thing"></span>
 	<span id="settag" class="glyphicon glyphicon-qrcode qrcode scanqrbtn" data-dest="#place" data-mode="set"></span>
 	<span class="glyphicon glyphicon-log-out removebtn"></span>
+	<span class="glyphicon glyphicon-copy inventorybtn"></span>
 </div>
 
 		
@@ -289,7 +289,20 @@
 
 </div>
 
+  <div id="inventory" class="toplevel">
+<p>Inventory</p>
 
+<div id="invlist">
+uninit
+</div>
+  </div>
+
+  <div id="synclog" class="toplevel">
+  
+uninit
+
+  </div>
+  
 <div id="footer" class="navbar navbar-fixed-bottom">
 	<button type="button" class="btn btn-default btn-lg savebtn">
 		<span class="glyphicon glyphicon-floppy-save" aria-hidden="true"></span> Save

@@ -149,6 +149,59 @@ $('.removebtn').click(function() {
 	
 });
 
+$('.inventorybtn').click(function() {
+	tid = $('#thing').html();
+
+	switch_toplevel("#inventory");
+	$('#invlist').html('');
+			getRackChildren(tid, function(child) {
+
+				var shortName = getShortName(child);
+				var childImage = getImageSrc(child);
+				var rp = child.rack_position;
+				console.log('ha');
+				$('#invlist').append(`<div class="row inventoryitem">
+	<div class="col-xs-1">
+	<center>${child.rack_position}</center>
+	</div>
+	<div class="col-xs-2 text-center">
+	<img src="${childImage}" class="child img-rounded">
+	</div>
+	<div class="col-xs-5 text-center">
+	${child.name}
+	</div>
+	<div id="inv-${child.id}" class="col-xs-4 text-center">
+	</div>
+</div>`);
+
+				if (child.type == 'UNQ') {
+					$('#inv-'+child.id).append(`<div class="checkbox">
+    <label>
+      <input type="checkbox"> @	
+    </label>
+  </div>`);
+				}
+				else if (child.type == 'SKU') {
+					var out_of = (child.sku_min_qty > 0) ? '/'+child.sku_min_qty : '';
+					
+					$('#inv-'+child.id).append(`<div class="row">
+	<div class="col-xs-3">
+		<big><span id="inv-${child.id}-qty">${child.sku_qty}${out_of}</span></big>
+	</div>
+	<div class="col-xs-5">
+			<big><span class="glyphicon glyphicon-minus qtyadjdown"></span></big>		
+	</div>
+	<div class="col-xs-4">	
+			<big><span class="glyphicon glyphicon-plus qtyadjup"></span></big>
+	</div>
+</div>`);
+				}
+
+			});	
+	//$('#invlist').show();
+	return true;
+});
+
 $('.newthing').click(function() {
 
 	switch_toplevel('#current');
@@ -168,22 +221,6 @@ $('.mythings').click(function() {
 	return listThings();
 });
 
-$('#inventory').click(function() {
-
-	switch_toplevel('#list');
-
-	$.ajax({
-		dataType: "html",
-		type: "ajax",
-		url: '/api/things/inventory',
-		success: function (data, textStatus){
-			$("#list").html(data);
-		},
-		error: function (jqXHR, textStatus, errorThrown) { ajaxError('origin', jqXHR, textStatus, errorThrown); }
-	});
-
-	return true;
-});
 
 
 $('.thingsearch').on('submit', function() {
@@ -355,8 +392,8 @@ $('#skuqty').change(function() {
 
 $('.savebtn').hide();
 
-$('.uploadAll').click(function() {
-	updateAll();
+$('.remoteSync').click(function() {
+	remoteSync();
 });
 
 } // end begin
@@ -374,6 +411,7 @@ function listThings(){
 
 function updateThingList(pattern = false) {
 	getThings(pattern, function(thing) {
+		console.log(thing.time_deleted);
 // getLineage like this has some kind of scope conflict for thing
 //getLineage(thing.id, function(lineage) {
 
@@ -964,13 +1002,21 @@ function updateRecent() {
 	});
 }
 
-function updateAll() {
+function remoteSync() {
+	var log = $('#synclog');
 	
+	log.html('');
+	log.append('<div>starting</div>');
+	switch_toplevel("#synclog");
+	
+	/// todo support delete
 	getThingsFromServer(function(junk, remoteThings) {
-			console.log(remoteThings);
+		remoteThings = JSON.parse(remoteThings);
+			//console.log(remoteThings);
 
 		getAllThings(false, function(things) {
-			console.log(things);
+			//console.log(things);
+			// Check all local items are in remote
 			for(x=0; x<things.rows.length; x++) {
 				console.log('index '+x);
 				
@@ -979,9 +1025,9 @@ function updateAll() {
 				thing.user_id = userId;
 				
 				remoteThing = false;
-				console.log(remoteThings.length);
+				//console.log(remoteThings.length);
 				for(var y=0; y<remoteThings.length; y++) {
-					console.log(remoteThings[y].name);
+					//console.log(remoteThings[y].thing_id);
 						if (remoteThings[y].thing_id == thing.id) {
 							remoteThing = remoteThings[y];
 							break;
@@ -989,36 +1035,54 @@ function updateAll() {
 				}
 				
 				if (remoteThing == false) {
-					console.log("can't find remote " + thing.id);
+					//console.log("remote add " + thing.id);
+					log.append('<div>Add '+thing.id+' </div>');
+					addOnServer(thing);
 				}
 				else {
-					console.log("found remote " + thing.id);
-					
-				}
-				return true;
+					//console.log("found remote " + thing.id);
+					//log.append('<div>found '+thing.id+' </div>');
+					if (remoteThing.time_modified < thing.time_modified) {
+						//console.log('remote update ' + thing.id);
+						log.append('<div>Update '+thing.id+' </div>');
+						updateOnServer(thing);
+					}
 				
-				getThingFromServer(thing, function(thing, remoteThing) {
-					console.log(remoteThing);
-					if (remoteThing == "") {
-						//console.log('not found '+thing.name);
-						addOnServer(thing);
-					}
-					else {
-						remoteThing = JSON.parse(remoteThing);
-						//console.log('remote', remoteThing);
-						//console.log('local', thing);
-						//console.log(remoteThing.time_modified, thing.time_modified);
-						if (remoteThing.time_modified < thing.time_modified) {
-							//console.log('thing has been updated ' + thing.id);
-							updateOnServer(thing);
-						}
-					}
-				});
+				}
 
-				//things[x].user_id = userId;
-				//console.log(thing[x]);
-				//updateFieldOnServer(things[x], 'name');
 			}
+			
+			// Check all remote things are in local
+			for(x=0; x<remoteThings.length; x++) {
+				
+				var remoteThing = remoteThings[x];
+				//console.log(remoteThing.thing_id, remoteThing.name);
+				
+				localThing = false;
+				for(var y=0; y<things.rows.length; y++) {
+						if (remoteThing.thing_id == things.rows.item(y).id) {
+							localThing = things.rows.item(y);
+							break;
+						}
+				}
+				
+				if (localThing == false) {
+					//console.log("can't find local adding " + thing.id);
+					r = remoteThing;
+					saveThing(r.thing_id, r.name, r.imageFile, r.parentId, r.print, r.type, r.sku_min_qty, r.sku_qty, r.qty, r.type_data, r.rack_rows, r.rack_cols, r.rack_position, r.imageData, function(r) {
+						//console.log("saved local");
+						log.append('<div>Download '+thing.id+' </div>');
+
+					});
+				}
+				//else {
+				//	console.log("found local", localThing.id, localThing.name);
+				//	
+				//}
+
+
+			}
+			log.append('<div>Complete</div>');
 		}, 1000);
 		
 	});
