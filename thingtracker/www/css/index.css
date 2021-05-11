@@ -165,6 +165,9 @@ padding-right: 2px;
 img.child, img.recent {
 height: 70px;
 }
+img.inventory {
+height: 50px;
+}
 div.child, div.recent {
 	width: 25%;
 	display: inline-block;

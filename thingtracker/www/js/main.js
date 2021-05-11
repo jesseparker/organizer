@@ -154,18 +154,24 @@ $('.inventorybtn').click(function() {
 
 	switch_toplevel("#inventory");
 	$('#invlist').html('');
-			getRackChildren(tid, function(child) {
+			getRackChildren(tid, function(resultSet) {
 
+            for(var x = 0; x < resultSet.rows.length; x++) {
+				child = resultSet.rows.item(x);
+				
+                console.log('child ' + thing);
+				
+			
 				var shortName = getShortName(child);
 				var childImage = getImageSrc(child);
 				var rp = child.rack_position;
 				console.log('ha');
 				$('#invlist').append(`<div class="row inventoryitem">
-	<div class="col-xs-1">
-	<center>${child.rack_position}</center>
+	<div class="col-xs-1 center-block">
+	${child.rack_position}
 	</div>
 	<div class="col-xs-2 text-center">
-	<img src="${childImage}" class="child img-rounded">
+	<img src="${childImage}" class="inventory img-rounded">
 	</div>
 	<div class="col-xs-5 text-center">
 	${child.name}
@@ -186,19 +192,35 @@ $('.inventorybtn').click(function() {
 					
 					$('#inv-'+child.id).append(`<div class="row">
 	<div class="col-xs-3">
-		<big><span id="inv-${child.id}-qty">${child.sku_qty}${out_of}</span></big>
+		<big><span id="inv-${child.id}-qty">${child.sku_qty}</span>${out_of}</big>
 	</div>
 	<div class="col-xs-5">
-			<big><span class="glyphicon glyphicon-minus qtyadjdown"></span></big>		
+			<big><span class="glyphicon glyphicon-minus qtyadj" data-id="${child.id}" data-direction="-" data-update="inv-${child.id}-qty"></span></big>		
 	</div>
 	<div class="col-xs-4">	
-			<big><span class="glyphicon glyphicon-plus qtyadjup"></span></big>
+			<big><span class="glyphicon glyphicon-plus qtyadj" data-id="${child.id}" data-direction="+" data-update="inv-${child.id}-qty"></span></big>
 	</div>
 </div>`);
 				}
+			}
+			
+			
+			$('.qtyadj').click(function(){
+				var tid = $(this).attr('data-id');
+				var dir = $(this).attr('data-direction');
+				var update = $(this).attr('data-update');
+				var cur = parseInt($('#inv-'+tid+'-qty').html());
+				cur = (dir == '-') ? cur -1 : cur + 1;
+				setSkuQty(tid, cur);
+				$('#inv-'+tid+'-qty').html(cur);
+			});
+			
+			
+			});
 
-			});	
+		
 	//$('#invlist').show();
+	
 	return true;
 });
 
@@ -361,6 +383,7 @@ $(this).parent().find(".glyphicon-menu-down").removeClass("glyphicon-menu-down")
 $(this).parent().find(".glyphicon-menu-up").removeClass("glyphicon-menu-up").addClass("glyphicon-menu-down");
 });
 
+// adjust thing quantity
 
 $('.qtyadjup').click(function (){
 	tid=$('#thing').html();
@@ -374,10 +397,26 @@ $('.qtyadjup').click(function (){
 	return true;
 });
 
-$('.qtyadjdown').click(function (){
+// for inventory
+$('.qtydown').click(function (){
+	alert($(this).attr('data-id'));
+	return true;
+	
 	tid=$('#thing').html();
 	q = $('#qty').html();
 	q--;
+	$('#qty').html(q);
+	$('#skuqty').val(q);
+	
+	setSkuQty(tid, q);
+	
+	return true;
+});
+
+$('.qtyup').click(function (){
+	tid=$('#thing').html();
+	q = $('#qty').html();
+	q++;
 	$('#qty').html(q);
 	$('#skuqty').val(q);
 	
@@ -681,7 +720,14 @@ function lookupThing(tid) {
 				
 			});
 
-		}	
+		}
+
+		if(thing.type == 'RACK') {
+			$(".inventorybtn").show();			
+		}
+		else {
+			$(".inventorybtn").hide();
+		}
 	},
 	function() {
 		/// getThing fails
@@ -1058,7 +1104,7 @@ function remoteSync() {
 				var remoteThing = remoteThings[x];
 				//console.log(remoteThing.thing_id, remoteThing.name);
 				
-				localThing = false;
+				var localThing = false;
 				for(var y=0; y<things.rows.length; y++) {
 						if (remoteThing.thing_id == things.rows.item(y).id) {
 							localThing = things.rows.item(y);
