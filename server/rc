@@ -1,3 +1,7 @@
 function db () {
   mysql -u thing -pporcupine thing
 }
+function dump () {
+  mysqldump -u thing -pporcupine thing
+}
+

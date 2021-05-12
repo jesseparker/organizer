@@ -76,6 +76,25 @@ connection.query('update things set name = ?, parentId = ?, type = ?, sku_min_qt
 });
 });
 
+app.post('/deleteThing', function(req, res) {
+
+var jsondata = req.body;
+var values = [];
+
+  values = [jsondata[0].id, jsondata[0].user_id];
+
+console.log('delete Thing', jsondata[0].id);
+connection.query('delete from things where thing_id = ? and user_id = ?', values, function(err,result) {
+  if(err) {
+     res.send('Error');
+          console.log(err);
+  }
+ else {
+     res.send('Success');
+  }
+});
+});
+
 app.post('/updateThingField', function(req, res) {
 
 var jsondata = req.body;
@@ -125,7 +144,7 @@ var substitutions = [jsondata[0].user_id];
 
 console.log('get things', substitutions);
 
-connection.query('select thing_id, time_modified from things where user_id = ?', substitutions, function(err,result) {
+connection.query('select * from things where user_id = ?', substitutions, function(err,result) {
   if(err) {
      res.send('Error');
           console.log(err);
