@@ -165,7 +165,7 @@ $('.inventorybtn').click(function() {
 				var shortName = getShortName(child);
 				var childImage = getImageSrc(child);
 				var rp = child.rack_position;
-				console.log('ha');
+
 				$('#invlist').append(`<div class="row inventoryitem">
 	<div class="col-xs-1 center-block">
 	${child.rack_position}
@@ -181,9 +181,11 @@ $('.inventorybtn').click(function() {
 </div>`);
 
 				if (child.type == 'UNQ') {
+					var checked = (child.sku_qty > 0) ? ' checked' : '';
+					
 					$('#inv-'+child.id).append(`<div class="checkbox">
     <label>
-      <input type="checkbox"> @	
+      <input type="checkbox"${checked} id="inv-${child.id}-check" class="qtycheck" data-id="${child.id}" data-update="inv-${child.id}-check"> @	
     </label>
   </div>`);
 				}
@@ -213,6 +215,13 @@ $('.inventorybtn').click(function() {
 				cur = (dir == '-') ? cur -1 : cur + 1;
 				setSkuQty(tid, cur);
 				$('#inv-'+tid+'-qty').html(cur);
+			});
+			$('.qtycheck').click(function(){
+				var tid = $(this).attr('data-id');
+				var update = '#'+$(this).attr('data-update');
+				console.log($(update).is(':checked'));
+				var cur = ( $(update).is(':checked') == true ) ? 1 : 0 ;
+				setSkuQty(tid, cur);
 			});
 			
 			
