@@ -17,7 +17,7 @@
  * under the License.
  */
 var db = null;
-var dbFile = 'tnings.db';
+var dbFile = 'things2.db';
 var dbdirectory = null;
 var toplevel = null;
 

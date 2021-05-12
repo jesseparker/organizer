@@ -71,6 +71,32 @@ function deleteThing(id, callback) {
     });
 }
 
+function purgeThing(id, callback) {
+
+    db.transaction(function (tx) {
+	
+		var now = new Date();	
+		var deleted = Math.round(now.getTime() / 1000);
+		
+        var query = "delete from things where id = ?";
+        //var query = "delete from things where id = ?";
+		console.log(query);
+
+        tx.executeSql(query, [id], function(tx, res) {
+            //console.log("insertId: " + res.insertId + " -- probably 1");
+            console.log("rowsAffected: " + res.rowsAffected + " -- should be 1");
+			callback(res.rowsAffected);
+        },
+        function(tx, error) {
+            console.log('UPDATE error: ' + error.message);
+        });
+    }, function(error) {
+        console.log('transaction error: ' + error.message);
+    }, function() {
+        console.log('transaction ok');
+    });
+}
+
 function orphanThing(tid, callback) {
 
     db.transaction(function (tx) {
@@ -206,10 +232,12 @@ function getAllThings(pattern = false, callback, limit = 1000) {
 
 
 		if (pattern) {
-			var query = "SELECT * from things where time_deleted is null and name like '%"+pattern+"%' order by time_modified desc limit "+limit;
+			var query = "SELECT * from things where and name like '%"+pattern+"%' order by time_modified desc limit "+limit;
+			var query = "SELECT * from things where and name like '%"+pattern+"%' order by time_modified desc limit "+limit;
 		}
 		else {		
-			var query = "SELECT * from things where time_deleted is null order by time_modified desc limit "+limit;
+			var query = "SELECT * from things order by time_modified desc limit "+limit;
+			var query = "SELECT * from things order by time_modified desc limit "+limit;
 		}
 
 		var thing = null;

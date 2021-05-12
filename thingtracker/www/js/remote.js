@@ -7,6 +7,9 @@ function updateOnServer(thing) {
 		sendJSON('updateThing', thing);
 }
 
+function deleteOnServer(thing, callback) {
+		sendJSON('deleteThing', thing, callback, thing);
+}
 function updateFieldOnServer(thing, field) {
 	var value = thing[field];
 		sendJSON('updateThingField', { 'id': thing.id, 'field': field, 'value': thing[field], 'user_id': thing.user_id });

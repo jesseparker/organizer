@@ -155,7 +155,7 @@ $('.inventorybtn').click(function() {
 	switch_toplevel("#inventory");
 	$('#invlist').html('');
 			getRackChildren(tid, function(resultSet) {
-
+			
             for(var x = 0; x < resultSet.rows.length; x++) {
 				child = resultSet.rows.item(x);
 				
@@ -471,7 +471,7 @@ function updateThingList(pattern = false) {
 </div>
 </li>`);
 //});		
-	});
+	}, 100);
 	
 }
 /*
@@ -1063,13 +1063,39 @@ function remoteSync() {
 		getAllThings(false, function(things) {
 			//console.log(things);
 			// Check all local items are in remote
+			
+			// Handle deleted items
+			for(x=0; x<things.rows.length; x++) {
+				
+				var thing = things.rows.item(x);
+				//console.log(thing.id, thing.name);
+				thing.user_id = userId;
+				
+				if(thing.time_deleted != null) {
+					console.log('delete ', thing.id, thing.name);
+					deleteOnServer(thing, function(dthing) {
+						purgeThing(dthing.id, function() {
+							console.log('purged', dthing.id);
+							log.append('<div>Purge '+dthing.id+' </div>');
+						});
+					});
+				}
+
+			}
+			
 			for(x=0; x<things.rows.length; x++) {
 				console.log('index '+x);
 				
 				var thing = things.rows.item(x);
 				console.log(thing.id, thing.name);
+
+				if(thing.time_deleted != null) {
+					console.log('skip deleted', thing.id);
+					continue;
+				}
+
 				thing.user_id = userId;
-				
+								
 				remoteThing = false;
 				//console.log(remoteThings.length);
 				for(var y=0; y<remoteThings.length; y++) {
@@ -1115,9 +1141,9 @@ function remoteSync() {
 				if (localThing == false) {
 					//console.log("can't find local adding " + thing.id);
 					r = remoteThing;
-					saveThing(r.thing_id, r.name, r.imageFile, r.parentId, r.print, r.type, r.sku_min_qty, r.sku_qty, r.qty, r.type_data, r.rack_rows, r.rack_cols, r.rack_position, r.imageData, function(r) {
+					saveThing(r.thing_id, r.name, r.imageFile, r.parentId, r.print, r.type, r.sku_min_qty, r.sku_qty, r.qty, r.type_data, r.rack_rows, r.rack_cols, r.rack_position, r.imageData, function(did) {
 						//console.log("saved local");
-						log.append('<div>Download '+thing.id+' </div>');
+						log.append('<div>Download '+did+' </div>');
 
 					});
 				}
