@@ -272,34 +272,23 @@ $('#pimg').click(function() {
 	thingDetail($('#parent').html());
 });
 $('#markprintedbtn').click(function() {
-	$.ajax({
-		dataType: "html",
-		type: "GET",
-		url: '/api/displays/markprinted',
-		success: function (data, textStatus){
-			status_msg('Printed');
-		
-		},
-		error: function (jqXHR, textStatus, errorThrown) { ajaxError('origin', jqXHR, textStatus, errorThrown); }
-
-	});
+	clearPrintAllThings(function(num) {status_msg('Cleared ' + num);});
+	return true;
+});
+$('#tagsheet').click(function() {
+	tagSheet();
 	return true;
 });
 
 $('#printq').change(function() {
-		
-	$.ajax({
-		type: "POST",
-		url: '/api/displays/marktoprint',
-		data: {tid:$('#thing').html(), print: $('#printq').prop('checked')},
-		success: function (data, textStatus){
-			//alert(data);
-			status_msg('Saved');
-		
-		},
-		error: function (jqXHR, textStatus, errorThrown) { ajaxError('origin', jqXHR, textStatus, errorThrown); }
-
+	var tid = $('#thing').html();	
+	var cur = ($(this).prop('checked')) ? 1 : 0;
+	console.log('printq is', cur);
+	
+	updateThingField(tid, 'print', cur, function() {
+		console.log(tid +' marked fr print');
 	});
+	
 	return true;
 });
 
@@ -332,23 +321,14 @@ $('#loginbtn').click(function() {
 	
 	});
 	
-$('#logoutbtn').click(function() { 
-		$.ajax({
-		dataType: "html",
-		type: "GET",
-		url: '/api/users/logout',
-		success: function (data, textStatus){
-			status_msg("Goodbye");
-			switch_toplevel('#home');
-		},
-		error: function (jqXHR, textStatus, errorThrown) { ajaxError('origin', jqXHR, textStatus, errorThrown); }
-
-	});
+/* $('#logoutbtn').click(function() { 
 	
 	return true;
 	
-	});
-
+	}); */
+$('#printbtn').click(function() {
+	printQueue();
+});
 
 $('#manualform').on('submit', function() {
 
@@ -620,7 +600,7 @@ function lookupThing(tid) {
 		$("#rackrows").val(thing.rack_rows);
 		$("#rackposition").val(thing.rack_position);
 		$("#qty").html(thing.sku_qty);
-		$("#printq").prop('checked', thing.print);
+		$("#printq").prop('checked', (thing.print == 1) ? true : false);
 
 		getLineage(thing.id, function(lineage) {
 			$("#lineage").html(lineage);
@@ -1044,6 +1024,8 @@ function updateRecent() {
 	getRecent(function(recent) {
 		var recentImage = getImageSrc(recent);
 		var shortName = getShortName(recent);
+		if (shortName == '') shortName = recent.id;
+		
 		$("#recent").append(`<div class="recent">
 	<div class="text-center">
 	<a href="#" onClick="chooseRecent('${ recent.id }');">
@@ -1169,5 +1151,92 @@ function remoteSync() {
 	});
 	return true;
 	
+
+}
+
+function printQueue() {
+	
+	var log = $('#synclog');
+
+	var wid = 90;
+	
+	getAllThingsToPrint(function(resultSet) {
+		
+	log.html('');
+	log.append(`<style>div.qrprint div {
+	width: ${wid+20}px;
+	display: inline-block;
+}
+</style>
+<div class="qrprint" id="printqr"></div>`);
+
+console.log("print rows", resultSet.rows.length);
+
+	for(var c = 0; c<resultSet.rows.length; c++) {
+		var t = resultSet.rows.item(c);
+		
+	$('#printqr').append(`<div>
+	<div class="align-center">${t.id}</div>
+	<div id="testqr${c}"></div>
+	<div class="align-center">${t.name}</div>
+	</div>`);
+	new QRCode(document.getElementById('testqr'+c), {
+    text: t.id,
+    width: wid,
+    height: wid,
+    colorDark : "#000000",
+    colorLight : "#ffffff",
+    correctLevel : QRCode.CorrectLevel.H
+});
+	}
+	//log.append('</div>');
+	});
+
+ 
+	switch_toplevel("#synclog");
+	  cordova.plugins.printer.print();
+
+}
+
+
+function tagSheet(start = 200, qty = 80, width = 65) {
+	
+	var log = $('#synclog');
+
+	var wid = width;
+	
+//	getAllThingsToPrint(function(resultSet) {
+		
+	log.html('');
+	log.append(`<style>div.qrprint div {
+	width: ${wid+20}px;
+	display: inline-block;
+}
+</style>
+<div class="qrprint" id="printqr"></div>`);
+
+
+	for(var c = start; c<start+qty; c++) {
+		//var t = resultSet.rows.item(c);
+		
+	$('#printqr').append(`<div>
+	<div class="centered">TT${c}</div>
+	<div id="testqr${c}"></div>
+	</div>`);
+	new QRCode(document.getElementById('testqr'+c), {
+    text: 'TT'+c,
+    width: wid,
+    height: wid,
+    colorDark : "#000000",
+    colorLight : "#ffffff",
+    correctLevel : QRCode.CorrectLevel.H
+});
+	}
+	//log.append('</div>');
+//	});
+
+ 
+	switch_toplevel("#synclog");
+	  cordova.plugins.printer.print();
 
 }

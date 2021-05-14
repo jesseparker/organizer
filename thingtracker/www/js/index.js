@@ -63,6 +63,8 @@ var app = {
 			//tx.executeSql('update things set time_modified = time_modified / 1000');
 			tx.executeSql('CREATE TABLE IF NOT EXISTS things (id text, name, imageFile, parentId, print, type, sku_min_qty, sku_qty, qty, type_data, rack_rows, rack_cols, rack_position, imageData, time_created integer, time_modified integer, time_scanned integer, time_deleted)');
  
+			tx.executeSql('CREATE TABLE IF NOT EXISTS counters (name, value integer)');
+ 
 		}, function (error) {
 			console.log('transaction error: ' + error.message);
 		}, function () {

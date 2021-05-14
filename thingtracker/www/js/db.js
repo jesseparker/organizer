@@ -121,6 +121,7 @@ function saveThing(id, name, imageFile, parentId, print, type, sku_min_qty, sku_
 
 	if(id == null || id == undefined || id == '' ) {
 		getNextUntaggedId(function(id) {
+			print = 1; // untagged default to print q
 			addThing(id, name, imageFile, parentId, print, type, sku_min_qty, sku_qty, qty, type_data, rack_rows, rack_cols, rack_position, imageData, callback);			
 		});
 		return true;
@@ -141,11 +142,14 @@ function updateThingField(id, field, value, callback) {
 	console.log('updateThingField ' + id);
     db.transaction(function (tx) {
 
-        var query = "update things set "+field+" = ? where id = ?";
+		var now = new Date();	
+		var updated = Math.round(now.getTime() / 1000);
+		
+        var query = "update things set "+field+" = ?, time_modified = ? where id = ?";
 		console.log(query);
 		
 		//var now = Date.now();
-        tx.executeSql(query, [value, id], function(tx, res) {
+        tx.executeSql(query, [value, updated, id], function(tx, res) {
             console.log("rowsAffected: " + res.rowsAffected + " -- should be 1");
 			callback(id, res.rowsAffected);
         },
@@ -242,6 +246,28 @@ function getAllThings(pattern = false, callback, limit = 1000) {
 
 		var thing = null;
         tx.executeSql(query, [], function (tx, resultSet) {
+
+		//console.log(resultSet);
+			callback(resultSet);
+        },
+        function (tx, error) {
+            console.log('SELECT error: ' + error.message);
+        });
+    }, function (error) {
+        console.log('transaction error: ' + error.message);
+    }, function () {
+        console.log('transaction ok');
+    });
+}
+
+function getAllThingsToPrint(callback, limit = 100) {
+
+    db.transaction(function (tx) {
+
+		var query = "SELECT * from things where print = 1 order by time_modified desc limit ?";
+
+		var thing = null;
+        tx.executeSql(query, [limit], function (tx, resultSet) {
 
 		//console.log(resultSet);
 			callback(resultSet);
@@ -365,10 +391,13 @@ function setSkuQty(tid, qty) {
 	
     db.transaction(function (tx) {
 
-		var query = "update things set sku_qty = "+qty+" where id = '"+tid+"'";
+		var now = new Date();	
+		var updated = Math.round(now.getTime() / 1000);
+
+		var query = "update things set sku_qty = ?, time_modified = ? where id = ?";
 		console.log(query);
 		
-        tx.executeSql(query, [], function (tx, resultSet) {
+        tx.executeSql(query, [qty, updated, tid], function (tx, resultSet) {
 
 			//console.log(resultSet);
 
@@ -388,28 +417,34 @@ function getNextUntaggedId(callback, prefix = 'TTU') {
 	
     db.transaction(function (tx) {
 
-		var query = "select count(id) macks from things where id like '"+prefix+"%'";
+		var query = "select value from counters where name = ?";
 		console.log(query);
 		
-        tx.executeSql(query, [], function (tx, resultSet) {
+        tx.executeSql(query, [prefix], function (tx, resultSet) {
 
 			if (resultSet.rows.length > 0) {
-				var max = resultSet.rows.item(0).macks;
-				console.log('max '+max);
-				if (max == null) {
-					callback(prefix + "1");
-					return true;
-				}
-				console.log(resultSet.rows.item(0));
-				console.log(max);
-				var number = parseInt(max);
+				var cur = resultSet.rows.item(0).value;
+				console.log('value '+cur);
+				
+				var number = parseInt(cur);
 				number++;
-				callback(prefix + number);
-				return true;
+				
+				query = "update counters set value = ? where name = ?";
+		console.log(query);
+		
+			tx.executeSql(query, [number, prefix], function (tx, resultSet) {
+					callback(prefix + number);
+			});
+				
 			}
 			else {
-				callback(prefix + "1");
-				return true;
+				var number = 200;
+		 query = "insert into counters (name, value) values (?, ?)";
+		console.log(query);
+		
+        tx.executeSql(query, [prefix, number], function (tx, resultSet) {
+			callback(prefix + number);
+		});
 			}
         },
         function (tx, error) {
@@ -427,7 +462,7 @@ function getRecent(callback) {
 	
     db.transaction(function (tx) {
 
-		var query = "SELECT * from things where time_scanned > 0 order by time_scanned desc limit 10";
+		var query = "SELECT * from things where time_scanned > 0 order by time_scanned desc limit 12";
 
 		var thing = null;
 		
@@ -523,4 +558,27 @@ function updateTid(current, to_be, successCallback, errorCallback) {
 	});
 
 
+}
+
+function clearPrintAllThings(callback) {
+
+	db.transaction(function (tx) {
+		
+		var query = "update things set print = 0";
+		console.log(query);
+		
+		tx.executeSql(query, [], function (tx, resultSet) {
+
+			//console.log(resultSet);
+			callback(resultSet.rowsAffected);
+			
+		},
+		function (tx, error) {
+			console.log('clearPrintAllThings error: ' + error.message);
+		});
+	}, function (error) {
+		console.log('transaction error: ' + error.message);
+	}, function () {
+		console.log('transaction ok');
+	});	
 }

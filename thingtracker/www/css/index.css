@@ -175,6 +175,10 @@ div.child, div.recent {
 .child, .recent {
 	font-size: 0.8em
 }
+div.qrprint div {
+	width: 120px;
+	display: inline-block;
+}
 body {
 	padding-top: 60px
 }
