@@ -115,11 +115,14 @@ h1 {
 .deletething,
 .removebtn,
 .inventorybtn,
+.deletebtn,
+.printbtn,
 #poscol,
 #posrow
  {
 	font-size: 3em
 }
+div.morebtn {padding-top: 3px}
 
 img.thumb
 {
@@ -175,10 +178,7 @@ div.child, div.recent {
 .child, .recent {
 	font-size: 0.8em
 }
-div.qrprint div {
-	width: 120px;
-	display: inline-block;
-}
+
 body {
 	padding-top: 60px
 }

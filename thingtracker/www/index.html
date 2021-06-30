@@ -17,7 +17,52 @@
 
         <title>Thing Tracker</title>
     </head>
-    <body>
+    <body style="display:none">
+
+<!-- Delete Modal -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Delete?</h4>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+        <button id="deletething" type="button" class="btn btn-primary">Delete</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Print Modal -->
+<div class="modal fade" id="printModal" tabindex="-1" role="dialog" aria-labelledby="printModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="printModalLabel">Print Tags</h4>
+      </div>
+	  <div class="modal-body">
+	  <div>
+			<select id="qrsize">
+				<option value="20">20mmX20mm</option>
+				<option value="50">50mmX50mm</option>
+				<option value="70">70mmX70mm</option>
+			</select>
+		</div>
+		<div>
+			<input type="checkbox" id="printimage" value="1"> Include Image
+		</div>
+		
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+        <span id="printbtn" type="button" class="btn btn-primary">Continue</span>
+      </div>
+    </div>
+  </div>
+</div>
 
 <nav class="navbar navbar-default navbar-fixed-top ttnav">
   <div class="container-fluid">
@@ -41,10 +86,11 @@
     <!-- Collect the nav links, forms, and other content for toggling -->
     <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
       <ul class="nav navbar-nav">
-        <li><a href="#" class="mythings"><span class="glyphicon glyphicon-list"></span> My Things</a></li>
+        <!--
+		<li><a href="#" class="mythings"><span class="glyphicon glyphicon-list"></span> My Things</a></li>
         <li><a href="#" class="scanqrbtn" data-dest="#thing" data-mode="lookup"><span class="glyphicon glyphicon-qrcode"></span> Scan</a></li>
         <li><a href="#" class="newthing" ><span class="glyphicon glyphicon-plus"></span> New</a></li>
-        
+        -->
 <!--         <li class="dropdown">
           <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">New<span class="caret"></span></a>
           <ul class="dropdown-menu">
@@ -58,7 +104,6 @@
 -->
           </ul>
         </li>
-<a href="#" class="remoteSync">SYNC</a>
       </ul>
 
       <form class="navbar-form navbar-left thingsearch" role="search">
@@ -73,9 +118,9 @@
         <li class="dropdown">
           <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">More<span class="caret"></span></a>
           <ul class="dropdown-menu">
-            <li class="disabled"><a href="#">Account Settings</a></li>
-            <li role="separator" class="divider"></li>
-            <li><a href="#" id="printbtn">Print</a></li>
+            <li><a href="#" data-toggle="modal" data-target="#printModal">
+				  <span class="glyphicon glyphicon-print printbtn"></span>
+				</a></li>
             <li><a href="#" id="markprintedbtn">Clear Print (All)</a></li>
             <li><a href="#" id="tagsheet">Sheet of Tags</a></li>
             <li role="separator" class="divider"></li>
@@ -166,8 +211,6 @@
 
   </div>
 
-
-
   <div id="current" class="toplevel">
 
    <div class="wrapcur thingcur">
@@ -245,13 +288,21 @@
 			 Columns <input type="number" size="40" value="1" id="rackcols" class="curdirty  form-control input-lg">
 			 Rows <input type="number" size="40" value="1" id="rackrows" class="curdirty  form-control input-lg">
 			</div>
-			<div>
-		
-		 <p><span class="glyphicon glyphicon-print"></span> <label class="checkbox-inline">
-		  <input type="checkbox" id="printq" value="1" checked="false"> Print
-		</label>
-		  <p><a href="#" id="deletething"><span class="glyphicon glyphicon-remove"></span> Delete</a></p>
-		 </div>
+		<div class="row morebtn">
+			<div class="col-xs-6">
+			 <span class="glyphicon glyphicon-print printbtn"></span>
+				<label class="checkbox-inline">
+				<input type="checkbox" id="printq" value="1" checked="false"> Print
+				</label>
+			</div>
+			<div class="col-xs-6">
+				<!-- Button trigger modal -->
+				<a href="#" data-toggle="modal" data-target="#myModal">
+				  <span class="glyphicon glyphicon-remove deletebtn"></span>
+				</a>
+			</div>
+		</div>
+
       </div>
     </div>
   </div>
