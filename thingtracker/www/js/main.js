@@ -106,11 +106,16 @@ $("#deletething").click(function() {
 
 	tid = $('#thing').html();
 
+	$('#myModal').modal('hide');
+	
 	deleteThing(tid, function() {
+		status_msg('Deleted<span class="glyphicon glyphicon-remove"></span>');
 		listThings();
 	});
 
-	status_msg('Deleted<span class="glyphicon glyphicon-remove"></span>');
+
+
+	
 	return true;
 
 });
@@ -424,6 +429,10 @@ $('.remoteSync').click(function() {
 	remoteSync();
 });
 
+//setTimeout(function() {
+$('body').show();
+//}, 2000);
+
 } // end begin
 
 
@@ -530,7 +539,7 @@ function resetThing() {
 	$(".tMain").addClass('col-xs-12');
 	$(".tInfo").hide();
 	$(".removebtn").hide();
-
+	$(".inventorybtn").hide();
 
 	return true;
 }
@@ -1156,16 +1165,30 @@ function remoteSync() {
 
 function printQueue() {
 	
+	var size = $('#qrsize').find(':selected').val();
+	var printImage = ($('#printimage').prop('checked')) ? true : false;
+	var printName = ($('#printname').prop('checked')) ? true : false;
+
 	var log = $('#synclog');
 
-	var wid = 90;
+	var wid = parseInt(size);
+
+	$('#printModal').modal('hide');
 	
 	getAllThingsToPrint(function(resultSet) {
 		
 	log.html('');
-	log.append(`<style>div.qrprint div {
-	width: ${wid+20}px;
+	log.append(`<style>div.qrprint div.noi {
+	width: ${wid+30}px;
 	display: inline-block;
+}
+div.qrprint div.hasi {
+	width: ${(wid+30)*2}px;
+	display: inline-block;
+}
+div.qrprint div {
+padding: 0,
+margin: 0
 }
 </style>
 <div class="qrprint" id="printqr"></div>`);
@@ -1175,12 +1198,25 @@ console.log("print rows", resultSet.rows.length);
 	for(var c = 0; c<resultSet.rows.length; c++) {
 		var t = resultSet.rows.item(c);
 		
-	$('#printqr').append(`<div>
-	<div class="align-center">${t.id}</div>
-	<div id="testqr${c}"></div>
-	<div class="align-center">${t.name}</div>
-	</div>`);
-	new QRCode(document.getElementById('testqr'+c), {
+	//printAppendTag('#printqr', t);
+	
+	if(printImage) {
+		var thingImage = getImageSrc(t);
+
+		$('#printqr').append(`<div class="row hasi">
+		<div class="col-xs-6">
+			<img src="${thingImage}" class="img-responsive img-rounded">
+		</div>
+		<div class="col-xs-6" id="t${t.id}">
+		</div>
+		</div>`);
+		printAppendTag('#t'+t.id, t);
+	}
+	else {
+		printAppendTag('#printqr', t);		
+	}
+	
+	new QRCode(document.getElementById('qr'+t.id), {
     text: t.id,
     width: wid,
     height: wid,
@@ -1198,6 +1234,13 @@ console.log("print rows", resultSet.rows.length);
 
 }
 
+function printAppendTag(el, t) {
+	$(el).append(`<div class="noi">
+	<div class="align-center">${t.id}</div>
+	<div id="qr${t.id}"></div>
+	<div class="align-center">${t.name}</div>
+	</div>`);
+}
 
 function tagSheet(start = 200, qty = 80, width = 65) {
 	
