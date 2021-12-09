@@ -157,6 +157,57 @@ connection.query('select * from things where user_id = ?', substitutions, functi
 });
 });
 
+app.post('/register', function(req, res) {
+
+        res.set('Access-Control-Allow-Origin', '*');
+
+var jsondata = req.body;
+
+var substitutions = [jsondata[0].email, jsondata[0].password];
+
+console.log('register', substitutions);
+
+
+connection.query('insert into users (email, password) values (?, ?)', substitutions, function(err,result) {
+  if(err) {
+     res.send('Error');
+          console.log(err);
+  }
+ else {
+        // res.set('Access-Control-Allow-Origin', '*');
+	var userId = result.insertId;
+	 var out = {userId:userId};
+	
+     res.send(JSON.stringify(out));
+  }
+});
+});
+
+app.post('/login', function(req, res) {
+
+//        res.set('Access-Control-Allow-Origin', '*');
+
+var jsondata = req.body;
+
+var substitutions = [jsondata[0].email, jsondata[0].password];
+
+console.log('login', substitutions);
+
+
+connection.query('select id from users where email = ? and password = ?', substitutions, function(err,result) {
+  if(err) {
+     res.send('Error');
+          console.log(err);
+  }
+ else {
+	 console.log(result);
+        var userId = result[0].id;
+         var out = {userId:userId};
+console.log(out);
+     res.send(JSON.stringify(out));
+  }
+});
+});
 
 
 
