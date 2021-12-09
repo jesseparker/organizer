@@ -4,7 +4,7 @@
 var TID_THING = 1;
 var TID_INVALID = -1;
 //var qrsc = "";
-var userId = 2029;
+var userId = null;
 
 function ajaxError(z, a, b, c) {
 	//alert('ajaxError: ' + z + ':' + JSON.stringify(a) + ' ' + b + ' ' + c);
@@ -259,16 +259,6 @@ $('.mythings').click(function() {
 
 
 
-$('.thingsearch').on('submit', function() {
-
-	$("#listul").html('');
-	switch_toplevel('#list');
-
-	updateThingList($('.thingsearch input').val());	
-	return false;
-//	return listThings($('.thingsearch input').val());
-
-});
 
 $('#parentimg').click(function() {
 	thingDetail($('#parent').html());
@@ -298,7 +288,7 @@ $('#printq').change(function() {
 });
 
 
-
+/*
 $('#loginbtn').click(function() {
 		console.log("login");
 		$.ajax({
@@ -325,7 +315,7 @@ $('#loginbtn').click(function() {
 	return false;
 	
 	});
-	
+	*/
 /* $('#logoutbtn').click(function() { 
 	
 	return true;
@@ -425,6 +415,37 @@ $('#skuqty').change(function() {
 
 $('.savebtn').hide();
 
+$('.register').click(function() {
+	switch_toplevel("#register");
+	
+	return true;
+});
+
+$('#registerForm').on('submit', function() {
+console.log("registerForm submit");
+	registerUser($('#registerEmail').val(), $('#registerPassword').val(), function(res) {
+		console.log(res);
+	});	
+	return false;
+});
+$('.login').click(function() {
+	switch_toplevel("#login");
+	
+	return true;
+});
+
+$('#loginForm').on('submit', function() {
+console.log("loginForm submit");
+	login($('#loginEmail').val(), $('#loginPassword').val(), function(thing, res) {
+		console.log(res);
+		var resp = JSON.parse(res);
+		console.log(resp);
+		if (resp.userId != null) userId = resp.userId;
+		console.log(userId);
+	});	
+	return false;
+});
+
 $('.remoteSync').click(function() {
 	remoteSync();
 });
@@ -434,6 +455,7 @@ $('body').show();
 //}, 2000);
 
 } // end begin
+
 
 
 function listThings(){
@@ -1049,6 +1071,13 @@ function updateRecent() {
 }
 
 function remoteSync() {
+	
+	if (userId == null) {
+			console.log("not logged in");
+			switch_toplevel('#login');
+			return false;
+	}
+	
 	var log = $('#synclog');
 	
 	log.html('');

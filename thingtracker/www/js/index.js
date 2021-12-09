@@ -103,7 +103,6 @@ else{
 
 // From camera plugin example
 function setOptions(srcType) {
-	console.log('here it is', $("input[name='editPictures']:checked").val());
 	
     var options = {
         // Some common settings are 20, 50, and 100

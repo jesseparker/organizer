@@ -25,6 +25,15 @@ function getThingsFromServer(callback) {
 		return sendJSON('getThings', { 'user_id': userId }, callback);
 }
 
+function registerUser(email, password, callback) {
+	console.log("registerUser");
+	return sendJSON('register', { 'email': email, 'password': password }, callback);
+}
+function login(email, password, callback) {
+	console.log("login");
+	return sendJSON('login', { 'email': email, 'password': password }, callback);
+}
+
 function sendJSON(method, data, callback = false, thing = false){
 
 	var xmlhttp = new XMLHttpRequest();   // new HttpRequest instance
